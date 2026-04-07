@@ -13,9 +13,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Mapbox token
+// Mapbox token// ================== MAPBOX TOKEN ==================
+// ¡NO BORRES ESTA LÍNEA! Solo cámbiala por tu token cuando estés trabajando localmente.
 mapboxgl.accessToken = 'pk.eyJ1IjoibWlndWVsLTMwIiwiYSI6ImNtbDlrcmJmcDA0YmwzZ3EwdXMwemRjZ2UifQ.FWkrX_a7mSsh4nrxcKPVwg';
-
+// =================================================
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v11',
