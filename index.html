@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Colectivos en Tiempo Real - Guernica y Zona</title>
+    <title>Colectivos en Tiempo Real - Línea 180</title>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -16,26 +16,35 @@
     <link rel="manifest" href="manifest.json">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { 
-            height: 100%; 
-            overflow: hidden; 
-            background: #111; 
-            font-family: Arial, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: #111;
+            font-family: Arial, sans-serif;
         }
 
         #map {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
         }
 
-        /* Botón menú (3 líneas) - esquina superior izquierda */
         #menu-btn {
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 100;
+            z-index: 130;
             background: #0066ff;
             color: white;
             border: none;
@@ -44,61 +53,78 @@
             height: 50px;
             font-size: 26px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
         #menu-btn:hover {
-            background: #0055cc;
+            background: #0055dd;
             transform: scale(1.1);
         }
 
-        /* Panel lateral que se desliza desde la izquierda */
         #buses-panel {
             position: absolute;
             top: 0;
             left: 0;
-            width: 320px;
+            width: 340px;
             height: 100%;
-            background: #1e1e1e;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.6);
+            background: #1f1f1f;
+            box-shadow: 6px 0 30px rgba(0, 0, 0, 0.8);
             transform: translateX(-100%);
             transition: transform 0.4s ease;
-            z-index: 90;
+            z-index: 140;
             overflow-y: auto;
             padding: 20px;
+            border-right: 4px solid #0066ff;
         }
 
         #buses-panel.open {
             transform: translateX(0);
         }
 
-        /* Botones flotantes inferiores (estilo Google Maps) */
+        #close-panel-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ff5555;
+            font-size: 32px;
+            cursor: pointer;
+        }
+
+        .ramal-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ddd;
+            font-size: 15px;
+        }
+
+        .ramal-item input[type="checkbox"] {
+            accent-color: #0066ff;
+            transform: scale(1.25);
+            cursor: pointer;
+        }
+
         .floating-btn {
             position: absolute;
+            bottom: 20px;
             right: 20px;
             background: #0066ff;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+            width: 55px;
+            height: 55px;
+            font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            z-index: 120;
         }
 
-        #myLocationBtn { bottom: 90px; }
-        #centerAllBtn   { bottom: 20px; }
-
-        .bus {
-            background: #222;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            border-left: 6px solid;
-            font-size: 14px;
+        #centerAllBtn {
+            bottom: 90px;
         }
     </style>
 </head>
@@ -107,45 +133,80 @@
 
     <div id="map"></div>
 
-    <!-- Botón menú (3 líneas) -->
     <button id="menu-btn">☰</button>
 
-    <!-- Panel lateral de colectivos -->
+    <!-- Panel lateral -->
     <div id="buses-panel">
-        <h2 style="color:#fff; margin-bottom:15px; text-align:center;">🚌 Colectivos en Tiempo Real</h2>
-        <div id="buses">Cargando colectivos...</div>
+        <button id="close-panel-btn">✕</button>
+
+        <h2 style="color:#fff; margin: 10px 0 20px 0; text-align:center;">
+            🚌 Colectivo - Línea 180
+        </h2>
+
+        <div style="margin-bottom: 20px; font-size: 14px; color: #ddd; line-height: 1.5;">
+            Use el mapa para buscar recorridos<br>
+            1. Click donde está<br>
+            2. Click adonde quiere ir
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <strong>Otra opción: buscar por dirección</strong>
+            <select id="origin-select"
+                style="width:100%; padding:10px; margin-top:8px; border-radius:6px; background:#333; color:white; border:none;">
+                <option value="">Buenos Aires</option>
+                <option value="Gonzalez Catan">González Catán</option>
+                <option value="Correo Central">Correo Central</option>
+            </select>
+        </div>
+
+        <div style="background:#2a2a2a; padding:18px; border-radius:10px;">
+            <strong style="color:#fff; display:block; margin-bottom:15px;">Ramales</strong>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a" checked>
+                <label for="ramal-a">A - 155 - González Catán</label>
+            </div>
+            <!-- Puedes agregar los demás ramales aquí más adelante -->
+        </div>
     </div>
 
-    <!-- Botones flotantes -->
-    <button id="myLocationBtn" class="floating-btn">📍</button>
     <button id="centerAllBtn" class="floating-btn">🎯</button>
-
-    <!-- Service Worker -->
+    <button id="myLocationBtn" class="floating-btn">📍</button>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((registration) => {
-                        console.log('Service Worker registrado con éxito:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Fallo al registrar Service Worker:', error);
-                    });
+                navigator.serviceWorker.register('./sw.js');
             });
         }
     </script>
 
     <script src="app.js"></script>
 
-    <!-- Script para abrir/cerrar el panel deslizante -->
     <script>
         const menuBtn = document.getElementById('menu-btn');
         const busesPanel = document.getElementById('buses-panel');
+        const closeBtn = document.getElementById('close-panel-btn');
+        const ramalA = document.getElementById('ramal-a');
 
-        menuBtn.addEventListener('click', () => {
-            busesPanel.classList.toggle('open');
+        menuBtn.addEventListener('click', () => busesPanel.classList.toggle('open'));
+        closeBtn.addEventListener('click', () => busesPanel.classList.remove('open'));
+
+        // === FUNCIONALIDAD DEL RAMAL A ===
+        let rutaLayerVisible = true;
+
+        ramalA.addEventListener('change', () => {
+            if (!map || !map.getLayer('ruta-180-layer')) return;
+
+            rutaLayerVisible = ramalA.checked;
+
+            if (rutaLayerVisible) {
+                map.setLayoutProperty('ruta-180-layer', 'visibility', 'visible');
+            } else {
+                map.setLayoutProperty('ruta-180-layer', 'visibility', 'none');
+            }
         });
     </script>
+
 </body>
 
 </html>
