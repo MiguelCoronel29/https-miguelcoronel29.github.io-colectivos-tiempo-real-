@@ -40,6 +40,7 @@
             height: 100%;
         }
 
+        /* Botón menú (☰) */
         #menu-btn {
             position: absolute;
             top: 20px;
@@ -61,6 +62,7 @@
             transform: scale(1.1);
         }
 
+        /* Panel lateral */
         #buses-panel {
             position: absolute;
             top: 0;
@@ -81,17 +83,36 @@
             transform: translateX(0);
         }
 
+        /* Botón cerrar - Versión corregida */
         #close-panel-btn {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 18px;
+            right: 18px;
             background: none;
             border: none;
             color: #ff5555;
-            font-size: 32px;
+            font-size: 30px;
             cursor: pointer;
+            z-index: 150;
+            padding: 4px 8px;
+            line-height: 1;
         }
 
+        #close-panel-btn:hover {
+            color: #ff8888;
+            transform: scale(1.2);
+        }
+
+        /* Título */
+        #buses-panel h2 {
+            margin-top: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #fff;
+            font-size: 22px;
+        }
+
+        /* Ramales */
         .ramal-item {
             margin-bottom: 12px;
             display: flex;
@@ -107,6 +128,7 @@
             cursor: pointer;
         }
 
+        /* Botón Mi Ubicación */
         .floating-btn {
             position: absolute;
             bottom: 20px;
@@ -123,8 +145,9 @@
             z-index: 120;
         }
 
-        #centerAllBtn {
-            bottom: 90px;
+        .floating-btn:hover {
+            background: #0055dd;
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -139,39 +162,62 @@
     <div id="buses-panel">
         <button id="close-panel-btn">✕</button>
 
-        <h2 style="color:#fff; margin: 10px 0 20px 0; text-align:center;">
-            🚌 Colectivo - Línea 180
-        </h2>
-
-        <div style="margin-bottom: 20px; font-size: 14px; color: #ddd; line-height: 1.5;">
-            Use el mapa para buscar recorridos<br>
-            1. Click donde está<br>
-            2. Click adonde quiere ir
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <strong>Otra opción: buscar por dirección</strong>
-            <select id="origin-select"
-                style="width:100%; padding:10px; margin-top:8px; border-radius:6px; background:#333; color:white; border:none;">
-                <option value="">Buenos Aires</option>
-                <option value="Gonzalez Catan">González Catán</option>
-                <option value="Correo Central">Correo Central</option>
-            </select>
+        <div style="margin-top: 55px; text-align: center;">
+            <h2 style="color:#fff; margin-bottom: 25px; font-size: 22px;">
+                🚌 Linea 180
+            </h2>
         </div>
 
         <div style="background:#2a2a2a; padding:18px; border-radius:10px;">
             <strong style="color:#fff; display:block; margin-bottom:15px;">Ramales</strong>
 
             <div class="ramal-item">
-                <input type="checkbox" id="ramal-a" checked>
-                <label for="ramal-a">A - 155 - González Catán</label>
+                <input type="checkbox" id="ramal-a-idayvuelta" checked>
+                <label for="ramal-a-idayvuelta">A - (X155) - González Catán hasta Correo Central</label>
             </div>
-            <!-- Puedes agregar los demás ramales aquí más adelante -->
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a-correo" checked>
+                <label for="ramal-a-correo">A - (X155) - Correo Central hasta González Catán</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-b-primerajunta" checked>
+                <label for="ramal-b-primerajunta">B - (Primera Junta) - González Catán hasta Primera Junta</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a-gonzalezcatan" checked>
+                <label for="ramal-a-gonzalezcatan">B - (Primera Junta) - Primera junta hasta gonzález catán</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-san-alberto" checked>
+                <label for="ramal-san-alberto">C - Hasta San Alberto</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-c-primera-junta" checked>
+                <label for="ramal-c-primera-junta">C - Hasta Primera Junta</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-d-san-justo" checked>
+                <label for="ramal-d-san-justo">D - Hasta San Justo</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-d-primera-junta" checked>
+                <label for="ramal-d-primera-junta">D - Hasta Primera Junta</label>
+            </div>
+
         </div>
     </div>
 
-    <button id="centerAllBtn" class="floating-btn">🎯</button>
+    <!-- Botón Mi Ubicación -->
     <button id="myLocationBtn" class="floating-btn">📍</button>
+
+    <!-- Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -182,29 +228,89 @@
 
     <script src="app.js"></script>
 
+    <!-- Control del panel -->
     <script>
         const menuBtn = document.getElementById('menu-btn');
         const busesPanel = document.getElementById('buses-panel');
         const closeBtn = document.getElementById('close-panel-btn');
-        const ramalA = document.getElementById('ramal-a');
 
         menuBtn.addEventListener('click', () => busesPanel.classList.toggle('open'));
         closeBtn.addEventListener('click', () => busesPanel.classList.remove('open'));
 
-        // === FUNCIONALIDAD DEL RAMAL A ===
-        let rutaLayerVisible = true;
+        // ==================== CONTROL DE RUTAS ====================
 
-        ramalA.addEventListener('change', () => {
-            if (!map || !map.getLayer('ruta-180-layer')) return;
-
-            rutaLayerVisible = ramalA.checked;
-
-            if (rutaLayerVisible) {
-                map.setLayoutProperty('ruta-180-layer', 'visibility', 'visible');
-            } else {
-                map.setLayoutProperty('ruta-180-layer', 'visibility', 'none');
+        // Ramal A completo (ida y vuelta)
+        const chkRamalA = document.getElementById('ramal-a-idayvuelta');
+        chkRamalA.addEventListener('change', () => {
+            const visible = chkRamalA.checked;
+            if (map && map.getLayer('ruta-180-layer')) {
+                map.setLayoutProperty('ruta-180-layer', 'visibility', visible ? 'visible' : 'none');
             }
         });
+
+        // Ramal A hacia Correo Central
+        const chkRamalACorreo = document.getElementById('ramal-a-correo');
+        chkRamalACorreo.addEventListener('change', () => {
+            const visible = chkRamalACorreo.checked;
+            if (map && map.getLayer('ruta-180-correo-layer')) {
+                map.setLayoutProperty('ruta-180-correo-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal B hacia Primera Junta
+        const chkRamalB = document.getElementById('ramal-b-primerajunta');
+        chkRamalB.addEventListener('change', () => {
+            const visible = chkRamalB.checked;
+            if (map && map.getLayer('ruta-180-aprimerajunta-layer')) {
+                map.setLayoutProperty('ruta-180-aprimerajunta-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal B hacia gonzalez catan
+        const chkGonzalezCatan = document.getElementById('ramal-a-gonzalezcatan');
+        chkGonzalezCatan.addEventListener('change', () => {
+            const visible = chkGonzalezCatan.checked;
+            if (map && map.getLayer('ruta-180-agonzalezcatan-layer')) {
+                map.setLayoutProperty('ruta-180-agonzalezcatan-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal hacia San Alberto
+        const chkSanAlberto = document.getElementById('ramal-san-alberto');
+        chkSanAlberto.addEventListener('change', () => {
+            const visible = chkSanAlberto.checked;
+            if (map && map.getLayer('ruta-180-asanalberto-layer')) {
+                map.setLayoutProperty('ruta-180-asanalberto-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal C hacia Primera Junta
+        const chkRamalC = document.getElementById('ramal-c-primera-junta');
+        chkRamalC.addEventListener('change', () => {
+            const visible = chkRamalC.checked;
+            if (map && map.getLayer('ruta-180-linea-c-hasta-primera-junta-layer')) {
+                map.setLayoutProperty('ruta-180-linea-c-hasta-primera-junta-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal D hacia San Justo
+        const chkRamalD = document.getElementById('ramal-d-san-justo');
+        chkRamalD.addEventListener('change', () => {
+            const visible = chkRamalD.checked;
+            if (map && map.getLayer('ruta-180-linea-d-hasta-san-justo-layer')) {
+                map.setLayoutProperty('ruta-180-linea-d-hasta-san-justo-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
+        // Ramal D hacia Primera Junta
+        const chkRamalDPrimera = document.getElementById('ramal-d-primera-junta');
+        chkRamalDPrimera.addEventListener('change', () => {
+            const visible = chkRamalDPrimera.checked;
+            if (map && map.getLayer('ruta-180-linea-d-hasta-primera-junta-layer')) {
+                map.setLayoutProperty('ruta-180-linea-d-hasta-primera-junta-layer', 'visibility', visible ? 'visible' : 'none');
+            }
+        });
+
     </script>
 
 </body>
