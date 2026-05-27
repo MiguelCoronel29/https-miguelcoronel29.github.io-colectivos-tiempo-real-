@@ -2210,7 +2210,7 @@ map.on('load', () => {
             'line-cap': 'round'
         },
         paint: {
-            'line-color': '#FF0000',
+            'line-color': '#4400ff',
             'line-width': 6,
             'line-opacity': 0.9
         }
@@ -2232,7 +2232,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-correo',
         paint: {
-            'line-color': '#00ff00',      // Verde para diferenciarla
+            'line-color': '#4400ff',      // Verde para diferenciarla
             'line-width': 6,
             'line-opacity': 0.85
         }
@@ -2277,7 +2277,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-agonzalezcatan',
         paint: {
-            'line-color': '#FF9800',     // Naranja brillante
+            'line-color': '#4400ff',     // Naranja brillante
             'line-width': 6.5,
             'line-opacity': 0.92
         }
@@ -2300,7 +2300,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-asanalberto',
         paint: {
-            'line-color': '#00BFFF',      // Celeste brillante
+            'line-color': '#4400ff',      // Celeste brillante
             'line-width': 6.5,
             'line-opacity': 0.90
         }
@@ -2323,7 +2323,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-linea-c-hasta-primera-junta',
         paint: {
-            'line-color': '#FF00FF',      // Magenta / Rosa fuerte (bien visible y diferente)
+            'line-color': '#4400ff',      // Magenta / Rosa fuerte (bien visible y diferente)
             'line-width': 6.5,
             'line-opacity': 0.90
         }
@@ -2346,7 +2346,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-linea-d-hasta-san-justo',
         paint: {
-            'line-color': '#e5ff00',      // Verde brillante (puedes cambiarlo si querés otro color)
+            'line-color': '#4400ff',      // Verde brillante (puedes cambiarlo si querés otro color)
             'line-width': 6.5,
             'line-opacity': 0.90
         }
@@ -2369,7 +2369,7 @@ map.on('load', () => {
         type: 'line',
         source: 'ruta-180-linea-d-hasta-primera-junta',
         paint: {
-            'line-color': '#ff0077',      // Naranja fuerte (diferente del anterior)
+            'line-color': '#4400ff',      // Naranja fuerte (diferente del anterior)
             'line-width': 6.5,
             'line-opacity': 0.90
         }
