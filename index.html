@@ -171,6 +171,15 @@
         <div style="background:#2a2a2a; padding:18px; border-radius:10px;">
             <strong style="color:#fff; display:block; margin-bottom:15px;">Ramales</strong>
 
+            <!-- Seleccionar Todas -->
+            <div class="ramal-item" style="margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 12px;">
+                <input type="checkbox" id="select-all" checked>
+                <label for="select-all" style="font-weight: bold; color: #fff;">
+                    Seleccionar / Deseleccionar todas
+                </label>
+            </div>
+
+            <!-- Ramales individuales -->
             <div class="ramal-item">
                 <input type="checkbox" id="ramal-a-idayvuelta" checked>
                 <label for="ramal-a-idayvuelta">A - (X155) - González Catán hasta Correo Central</label>
@@ -188,7 +197,7 @@
 
             <div class="ramal-item">
                 <input type="checkbox" id="ramal-a-gonzalezcatan" checked>
-                <label for="ramal-a-gonzalezcatan">B - (Primera Junta) - Primera junta hasta gonzález catán</label>
+                <label for="ramal-a-gonzalezcatan">B - (Primera Junta) - Primera junta hasta González Catán</label>
             </div>
 
             <div class="ramal-item">
@@ -313,6 +322,49 @@
 
     </script>
 
+    <script>
+
+        // ==================== SELECCIONAR TODAS ====================
+        const selectAll = document.getElementById('select-all');
+
+        const allRamalCheckboxes = [
+            document.getElementById('ramal-a-idayvuelta'),
+            document.getElementById('ramal-a-correo'),
+            document.getElementById('ramal-b-primerajunta'),
+            document.getElementById('ramal-a-gonzalezcatan'),
+            document.getElementById('ramal-san-alberto'),
+            document.getElementById('ramal-c-primera-junta'),
+            document.getElementById('ramal-d-san-justo'),
+            document.getElementById('ramal-d-primera-junta')
+            // Agrega aquí cualquier nuevo checkbox que crees
+        ];
+
+        // Función mejorada: oculta/muestra TODAS las rutas automáticamente
+        function toggleAllRoutes(visible) {
+            if (!map) return;
+
+            // Busca automáticamente todas las capas que empiecen con "ruta-180-"
+            const layers = map.getStyle().layers || [];
+            layers.forEach(layer => {
+                if (layer.id && layer.id.startsWith('ruta-180-')) {
+                    map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+                }
+            });
+        }
+
+        // Evento del checkbox "Seleccionar todas"
+        selectAll.addEventListener('change', () => {
+            const isChecked = selectAll.checked;
+
+            // Marcar/desmarcar todos los checkboxes individuales
+            allRamalCheckboxes.forEach(chk => {
+                if (chk) chk.checked = isChecked;
+            });
+
+            // Mostrar/ocultar todas las rutas del mapa
+            toggleAllRoutes(isChecked);
+        });
+    </script>
 </body>
 
 </html>

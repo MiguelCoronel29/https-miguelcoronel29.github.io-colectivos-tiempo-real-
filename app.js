@@ -2401,6 +2401,35 @@ map.on('load', () => {
         `)
             .addTo(map);
     });
+
+    // ==================== PONER TODAS LAS RUTAS DETRÁS DE LOS NOMBRES DE CALLES ====================
+    const layers = map.getStyle().layers;
+    const firstSymbolLayer = layers.find(layer => layer.type === 'symbol');
+
+    if (firstSymbolLayer) {
+        const routeLayerIds = [
+            'ruta-180-layer',
+            'ruta-180-correo-layer',
+            'ruta-180-aprimerajunta-layer',
+            'ruta-180-agonzalezcatan-layer',
+            'ruta-180-asanalberto-layer',
+            'ruta-180-linea-c-hasta-primera-junta-layer',
+            'ruta-180-linea-d-hasta-san-justo-layer',
+            'ruta-180-linea-d-hasta-primera-junta-layer',
+            'ruta-180-linea-e-hasta-gonzalezcatan-layer',
+            'ruta-180-linea-e-hasta-mataderos-layer',
+            'ruta-180-linea-f-hasta-san-alberto-layer',
+            'ruta-180-linea-f-hasta-primera-junta-layer'
+            // Agrega aquí cualquier nueva ruta que crees en el futuro
+        ];
+
+        routeLayerIds.forEach(id => {
+            if (map.getLayer(id)) {
+                map.moveLayer(id, firstSymbolLayer.id);
+            }
+        });
+    }
+
 });
 
 // ==================== TU UBICACIÓN (PUNTO AZUL) ====================
