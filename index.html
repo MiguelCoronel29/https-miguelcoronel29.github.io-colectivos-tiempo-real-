@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Colectivos en Tiempo Real - Línea 180</title>
 
     <!-- Firebase -->
@@ -148,6 +149,43 @@
         .floating-btn:hover {
             background: #0055dd;
             transform: scale(1.1);
+        }
+        /* ==================== OPTIMIZACIÓN PARA CELULAR ==================== */
+        @media (max-width: 768px) {
+            #buses-panel {
+                width: 92%;           /* Más ancho en celular */
+                max-width: 380px;
+            }
+
+            .floating-btn {
+                width: 62px;
+                height: 62px;
+                font-size: 28px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            #menu-btn {
+                top: 15px;
+                left: 15px;
+                width: 48px;
+                height: 48px;
+                font-size: 24px;
+            }
+
+            .ramal-item {
+                font-size: 15.5px;
+                padding: 4px 0;
+            }
+
+            #buses-panel {
+                padding: 18px 15px;
+            }
+        }
+
+        /* Evita que el mapa se mueva raro al tocar */
+        .mapboxgl-canvas {
+            touch-action: pan-x pan-y;
         }
     </style>
 </head>
