@@ -1,3 +1,4 @@
+/*
 const CACHE_NAME = 'colectivos-cache-v1';
 const urlsToCache = [
   './',
