@@ -30,71 +30,12 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
 let myMarker = null;
 let watchId = null;
 
-// VARIABLES PARA EL SUAVIZADO DE LA BRÚJULA
-let ultimoAngulo = 0;
-const factorSuavizado = 0.15; // Ajusta a 0.05 para más suavidad, o 0.30 para más velocidad
-
-// Creamos un ícono personalizado con forma de flecha/cono (puedes usar un SVG propio)
-const arrowIcon = L.divIcon({
-    html: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L22 22L12 18L2 22L12 2Z" fill="#0066ff" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-           </svg>`,
-    className: 'gps-arrow',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15] // Centrado perfecto
+// Creamos el ícono del punto azul usando las clases CSS que definimos arriba
+const blueDotIcon = L.divIcon({
+    className: 'google-maps-marker',
+    iconSize: [35, 35],
+    iconAnchor: [17.5, 17.5] // Centrado perfecto del div de 35x35
 });
-
-// Función para activar la orientación (Brújula)
-function activarBrujula() {
-    // Verificar si es un dispositivo iOS (iPhone) que requiere permiso especial
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(response => {
-                if (response === 'granted') {
-                    window.addEventListener('deviceorientation', manejarOrientacion, true);
-                }
-            })
-            .catch(console.error);
-    } else {
-        // Android y otros navegadores estándar
-        window.addEventListener('deviceorientationabsolute', manejarOrientacion, true);
-        // Si no soporta absolute, usamos el normal
-        window.addEventListener('deviceorientation', manejarOrientacion, true);
-    }
-}
-
-// Función auxiliar: Calcula la distancia más corta entre dos ángulos (evita giros bruscos en el Norte)
-function menorDiferenciaAngulo(actual, objetivo) {
-    let diff = (objetivo - actual + 180) % 360 - 180;
-    return diff < -180 ? diff + 360 : diff;
-}
-
-// Función que se ejecuta cada vez que giras el celular (Con filtro y freno de movimiento)
-function manejarOrientacion(event) {
-    let heading = event.webkitCompassHeading || event.alpha;
-    
-    if (heading !== null && heading !== undefined) {
-        if (!event.webkitCompassHeading && event.absolute === false) {
-            heading = 360 - heading; 
-        }
-
-        let diferencia = menorDiferenciaAngulo(ultimoAngulo, heading);
-
-        // --- NUEVO: UMBRAL DE MOVIMIENTO (FRENO) ---
-        // Si el giro es menor a 3.5 grados, asumimos que es "temblor" y nos quedamos quietos
-        if (Math.abs(diferencia) < 3.5) {
-            return; 
-        }
-
-        // Si pasó el umbral, aplicamos el suavizado de siempre
-        ultimoAngulo = ultimoAngulo + (diferencia * factorSuavizado);
-        ultimoAngulo = (ultimoAngulo + 360) % 360;
-
-        if (myMarker && myMarker._icon) {
-            myMarker._icon.style.transform = `${myMarker._icon.style.transform.split('rotate')[0]} rotate(${ultimoAngulo}deg)`;
-        }
-    }
-}
 
 // ==================== BOTÓN PRINCIPAL GPS ====================
 document.getElementById('myLocationBtn').addEventListener('click', () => {
@@ -103,17 +44,16 @@ document.getElementById('myLocationBtn').addEventListener('click', () => {
         return;
     }
 
-    // Intentamos activar la brújula (pedirá permiso si es la primera vez)
-    activarBrujula();
-
-    // Si ya existe el rastreo, volamos a la ubicación actual
+    // 1. Si el GPS ya está activo y vuelves a presionar, te centra en tu ubicación actual
     if (watchId && myMarker) {
         const currentLatLng = myMarker.getLatLng();
         map.flyTo(currentLatLng, 17, { duration: 1.2 });
         return;
     }
 
+    // 2. Si no estaba activo, iniciamos el rastreo en tiempo real de fondo
     if (!watchId) {
+        // Cambiamos el color del botón a azul indicando que está encendido
         document.getElementById('myLocationBtn').style.background = '#0066ff';
         let primeraVez = true;
 
@@ -122,25 +62,31 @@ document.getElementById('myLocationBtn').addEventListener('click', () => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // Creamos o movemos el marcador pasándole nuestro arrowIcon
+                // Movemos o creamos el punto azul parpadeante
                 if (myMarker) {
                     myMarker.setLatLng([lat, lng]);
                 } else {
-                    myMarker = L.marker([lat, lng], { icon: arrowIcon }).addTo(map);
+                    myMarker = L.marker([lat, lng], { icon: blueDotIcon }).addTo(map);
                 }
 
+                // SÓLO centra el mapa la primera vez que se activa
                 if (primeraVez) {
                     map.flyTo([lat, lng], 17, { duration: 1.2 });
-                    primeraVez = false;
+                    primeraVez = false; // Apagamos el centrado automático para los siguientes movimientos
                 }
             },
             (error) => {
                 alert('Error de GPS: ' + error.message);
+                // En caso de error, apagamos el rastreo y restauramos el botón
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
                 document.getElementById('myLocationBtn').style.background = 'rgb(126, 126, 126)';
             },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            { 
+                enableHighAccuracy: true, 
+                maximumAge: 0, 
+                timeout: 5000 
+            }
         );
     }
 });
