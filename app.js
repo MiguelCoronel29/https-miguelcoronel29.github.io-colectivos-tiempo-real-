@@ -28,8 +28,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
 
 // ==================== BOTÓN MI UBICACIÓN ====================
 let myMarker = null;
-let watchId = null; // Guardará el "id" del rastreo en tiempo real
-let isTracking = false; // Nos dirá si el GPS activo está siguiendo la pantalla o no
+let watchId = null;
 
 document.getElementById('myLocationBtn').addEventListener('click', () => {
     if (!navigator.geolocation) {
@@ -37,45 +36,50 @@ document.getElementById('myLocationBtn').addEventListener('click', () => {
         return;
     }
 
-    // Si ya te estaba siguiendo y vuelves a tocar el botón, te centra en el mapa
-    if (isTracking && myMarker) {
+    // 1. Si el GPS ya estaba encendido y volvemos a tocar el botón, simplemente volamos a donde esté el marcador actual
+    if (watchId && myMarker) {
         const currentLatLng = myMarker.getLatLng();
-        map.flyTo(currentLatLng, 17, { duration: 1.5 }); // Zoom 17 es ideal para ver calles de cerca
+        map.flyTo(currentLatLng, 17, { duration: 1.2 });
         return;
     }
 
-    // Si no estaba activo el rastreo en tiempo real, lo iniciamos:
-    if (!isTracking) {
-        isTracking = true;
-        
-        // Opcional: Cambiar el diseño del botón para avisar que está rastreando (ejemplo: ponerlo azul)
+    // 2. Si es la primera vez que se presiona, activamos el watchPosition
+    if (!watchId) {
+        // Ponemos el botón en azul para indicar que el GPS está encendido de fondo
         document.getElementById('myLocationBtn').style.background = '#0066ff';
+
+        // Una variable para saber si es la primerísima vez que obtenemos la posición
+        let primeraVez = true;
 
         watchId = navigator.geolocation.watchPosition(
             (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // 1. Mover o crear el marcador en tiempo real
+                // Actualizamos o creamos el marcador (se mueve en tiempo real de fondo)
                 if (myMarker) {
                     myMarker.setLatLng([lat, lng]);
                 } else {
-                    // Puedes cambiar el marcador por un círculo azul estilo GPS si quieres
                     myMarker = L.marker([lat, lng]).addTo(map);
                 }
 
-
+                // SOLUCIÓN AQUÍ: Solo centramos la pantalla automáticamente la PRIMERA vez que carga
+                if (primeraVez) {
+                    map.flyTo([lat, lng], 17, { duration: 1.2 });
+                    primeraVez = false; // Apagamos el centrado automático para los siguientes movimientos
+                }
             },
             (error) => {
                 alert('Error de GPS: ' + error.message);
-                // Si hay error, reseteamos el estado
-                isTracking = false;
+                // Si falla, limpiamos todo para que puedan reintentar
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
                 document.getElementById('myLocationBtn').style.background = 'rgb(126, 126, 126)';
             },
             { 
-                enableHighAccuracy: true, // Máxima precisión (usa el GPS real, no solo antenas)
-                maximumAge: 0,            // No queremos ubicaciones viejas guardadas en caché
-                timeout: 5000             // Si tarda más de 5 segundos en responder, tira error
+                enableHighAccuracy: true, 
+                maximumAge: 0,            
+                timeout: 5000             
             }
         );
     }
