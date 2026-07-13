@@ -64,8 +64,7 @@ document.getElementById('myLocationBtn').addEventListener('click', () => {
                     myMarker = L.marker([lat, lng]).addTo(map);
                 }
 
-                // 2. Centrar el mapa automáticamente en el usuario mientras se mueve
-                map.flyTo([lat, lng], 17, { duration: 1 });
+
             },
             (error) => {
                 alert('Error de GPS: ' + error.message);
