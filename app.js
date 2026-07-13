@@ -30,25 +30,73 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
 let myMarker = null;
 let watchId = null;
 
+// Creamos un ícono personalizado con forma de flecha/cono (puedes usar un SVG propio)
+const arrowIcon = L.divIcon({
+    html: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L22 22L12 18L2 22L12 2Z" fill="#0066ff" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+           </svg>`,
+    className: 'gps-arrow',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15] // Centrado perfecto
+});
+
+// Función para activar la orientación (Brújula)
+function activarBrujula() {
+    // Verificar si es un dispositivo iOS (iPhone) que requiere permiso especial
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', manejarOrientacion, true);
+                }
+            })
+            .catch(console.error);
+    } else {
+        // Android y otros navegadores estándar
+        window.addEventListener('deviceorientationabsolute', manejarOrientacion, true);
+        // Si no soporta absolute, usamos el normal
+        window.addEventListener('deviceorientation', manejarOrientacion, true);
+    }
+}
+
+// Función que se ejecuta cada vez que giras el celular
+function manejarOrientacion(event) {
+    // Buscamos los grados del norte magnético (varía según Android o iOS)
+    let heading = event.webkitCompassHeading || event.alpha;
+    
+    if (heading !== null && heading !== undefined) {
+        // Si usamos 'deviceorientation' normal en Android, viene invertido, lo corregimos:
+        if (!event.webkitCompassHeading && event.absolute === false) {
+            heading = 360 - heading; 
+        }
+
+        // Si el marcador ya existe en el mapa, lo hacemos rotar
+        if (myMarker && myMarker._icon) {
+            // Rotamos el elemento visual (el SVG) los grados correspondientes
+            myMarker._icon.style.transform = `${myMarker._icon.style.transform.split('rotate')[0]} rotate(${heading}deg)`;
+        }
+    }
+}
+
+// ==================== BOTÓN PRINCIPAL GPS ====================
 document.getElementById('myLocationBtn').addEventListener('click', () => {
     if (!navigator.geolocation) {
         alert('GPS no disponible en este dispositivo');
         return;
     }
 
-    // 1. Si el GPS ya estaba encendido y volvemos a tocar el botón, simplemente volamos a donde esté el marcador actual
+    // Intentamos activar la brújula (pedirá permiso si es la primera vez)
+    activarBrujula();
+
+    // Si ya existe el rastreo, volamos a la ubicación actual
     if (watchId && myMarker) {
         const currentLatLng = myMarker.getLatLng();
         map.flyTo(currentLatLng, 17, { duration: 1.2 });
         return;
     }
 
-    // 2. Si es la primera vez que se presiona, activamos el watchPosition
     if (!watchId) {
-        // Ponemos el botón en azul para indicar que el GPS está encendido de fondo
         document.getElementById('myLocationBtn').style.background = '#0066ff';
-
-        // Una variable para saber si es la primerísima vez que obtenemos la posición
         let primeraVez = true;
 
         watchId = navigator.geolocation.watchPosition(
@@ -56,31 +104,25 @@ document.getElementById('myLocationBtn').addEventListener('click', () => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
 
-                // Actualizamos o creamos el marcador (se mueve en tiempo real de fondo)
+                // Creamos o movemos el marcador pasándole nuestro arrowIcon
                 if (myMarker) {
                     myMarker.setLatLng([lat, lng]);
                 } else {
-                    myMarker = L.marker([lat, lng]).addTo(map);
+                    myMarker = L.marker([lat, lng], { icon: arrowIcon }).addTo(map);
                 }
 
-                // SOLUCIÓN AQUÍ: Solo centramos la pantalla automáticamente la PRIMERA vez que carga
                 if (primeraVez) {
                     map.flyTo([lat, lng], 17, { duration: 1.2 });
-                    primeraVez = false; // Apagamos el centrado automático para los siguientes movimientos
+                    primeraVez = false;
                 }
             },
             (error) => {
                 alert('Error de GPS: ' + error.message);
-                // Si falla, limpiamos todo para que puedan reintentar
                 navigator.geolocation.clearWatch(watchId);
                 watchId = null;
                 document.getElementById('myLocationBtn').style.background = 'rgb(126, 126, 126)';
             },
-            { 
-                enableHighAccuracy: true, 
-                maximumAge: 0,            
-                timeout: 5000             
-            }
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
         );
     }
 });
