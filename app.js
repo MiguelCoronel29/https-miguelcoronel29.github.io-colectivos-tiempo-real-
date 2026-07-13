@@ -28,31 +28,58 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
 
 // ==================== BOTÓN MI UBICACIÓN ====================
 let myMarker = null;
+let watchId = null; // Guardará el "id" del rastreo en tiempo real
+let isTracking = false; // Nos dirá si el GPS activo está siguiendo la pantalla o no
 
 document.getElementById('myLocationBtn').addEventListener('click', () => {
     if (!navigator.geolocation) {
-        alert('GPS no disponible');
+        alert('GPS no disponible en este dispositivo');
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
+    // Si ya te estaba siguiendo y vuelves a tocar el botón, te centra en el mapa
+    if (isTracking && myMarker) {
+        const currentLatLng = myMarker.getLatLng();
+        map.flyTo(currentLatLng, 17, { duration: 1.5 }); // Zoom 17 es ideal para ver calles de cerca
+        return;
+    }
 
-            if (myMarker) {
-                myMarker.setLatLng([lat, lng]);
-            } else {
-                myMarker = L.marker([lat, lng]).addTo(map);
+    // Si no estaba activo el rastreo en tiempo real, lo iniciamos:
+    if (!isTracking) {
+        isTracking = true;
+        
+        // Opcional: Cambiar el diseño del botón para avisar que está rastreando (ejemplo: ponerlo azul)
+        document.getElementById('myLocationBtn').style.background = '#0066ff';
+
+        watchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // 1. Mover o crear el marcador en tiempo real
+                if (myMarker) {
+                    myMarker.setLatLng([lat, lng]);
+                } else {
+                    // Puedes cambiar el marcador por un círculo azul estilo GPS si quieres
+                    myMarker = L.marker([lat, lng]).addTo(map);
+                }
+
+                // 2. Centrar el mapa automáticamente en el usuario mientras se mueve
+                map.flyTo([lat, lng], 17, { duration: 1 });
+            },
+            (error) => {
+                alert('Error de GPS: ' + error.message);
+                // Si hay error, reseteamos el estado
+                isTracking = false;
+                document.getElementById('myLocationBtn').style.background = 'rgb(126, 126, 126)';
+            },
+            { 
+                enableHighAccuracy: true, // Máxima precisión (usa el GPS real, no solo antenas)
+                maximumAge: 0,            // No queremos ubicaciones viejas guardadas en caché
+                timeout: 5000             // Si tarda más de 5 segundos en responder, tira error
             }
-
-            map.flyTo([lat, lng], 15, { duration: 1.5 });
-        },
-        (error) => {
-            alert('Error al obtener ubicación: ' + error.message);
-        },
-        { enableHighAccuracy: true }
-    );
+        );
+    }
 });
 
 // ==================== CLIC EN EL MAPA → COPIAR COORDENADAS PARA LEAFLET ====================
@@ -370,7 +397,7 @@ const rutaLinea180 = [
 const polylinePrincipal = L.polyline(rutaLinea180, { 
     color: '#ff0000', 
     weight: 6, 
-    opacity: 100 
+    opacity: 0.9 
 }).addTo(map);
 
 // Ruta Correo
