@@ -1,0 +1,75 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #111;
+    font-family: Arial, sans-serif;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Botón Mi Ubicación - Responsive */
+.floating-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 40px;
+    height: 40px;
+    background: rgb(126, 126, 126);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.floating-btn img {
+    width: 42px;
+    height: 42px;
+}
+
+.floating-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive para celulares */
+@media (max-width: 768px) {
+    .floating-btn {
+        width: 38px;
+        height: 38px;
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .floating-btn img {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* Para pantallas muy grandes (escritorios) */
+@media (min-width: 1200px) {
+    .floating-btn {
+        width: 70px;
+        height: 70px;
+        bottom: 30px;
+        right: 30px;
+    }
+
+    .floating-btn img {
+        width: 46px;
+        height: 46px;
+    }
+}
