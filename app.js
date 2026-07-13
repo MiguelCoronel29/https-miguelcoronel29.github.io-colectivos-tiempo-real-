@@ -69,27 +69,28 @@ function menorDiferenciaAngulo(actual, objetivo) {
     return diff < -180 ? diff + 360 : diff;
 }
 
-// Función que se ejecuta cada vez que giras el celular (Con filtro incorporado)
+// Función que se ejecuta cada vez que giras el celular (Con filtro y freno de movimiento)
 function manejarOrientacion(event) {
-    // Buscamos los grados del norte magnético (varía según Android o iOS)
     let heading = event.webkitCompassHeading || event.alpha;
-
+    
     if (heading !== null && heading !== undefined) {
-        // Si usamos 'deviceorientation' normal en Android, viene invertido, lo corregimos:
         if (!event.webkitCompassHeading && event.absolute === false) {
-            heading = 360 - heading;
+            heading = 360 - heading; 
         }
 
-        // --- FILTRO DE PASO BAJO (APLICACIÓN DE SUAVIZADO) ---
         let diferencia = menorDiferenciaAngulo(ultimoAngulo, heading);
-        ultimoAngulo = ultimoAngulo + (diferencia * factorSuavizado);
 
-        // Mantener el ángulo en el rango correcto de 0 a 360 grados
+        // --- NUEVO: UMBRAL DE MOVIMIENTO (FRENO) ---
+        // Si el giro es menor a 3.5 grados, asumimos que es "temblor" y nos quedamos quietos
+        if (Math.abs(diferencia) < 3.5) {
+            return; 
+        }
+
+        // Si pasó el umbral, aplicamos el suavizado de siempre
+        ultimoAngulo = ultimoAngulo + (diferencia * factorSuavizado);
         ultimoAngulo = (ultimoAngulo + 360) % 360;
 
-        // Si el marcador ya existe en el mapa, lo hacemos rotar de forma fluida
         if (myMarker && myMarker._icon) {
-            // Rotamos el elemento visual (el SVG) usando el ángulo suavizado
             myMarker._icon.style.transform = `${myMarker._icon.style.transform.split('rotate')[0]} rotate(${ultimoAngulo}deg)`;
         }
     }
