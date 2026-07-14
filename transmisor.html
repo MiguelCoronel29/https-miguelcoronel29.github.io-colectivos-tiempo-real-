@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -138,7 +139,6 @@
 
         startBtn.addEventListener('click', () => {
             if (intervalId !== null) {
-                // DETENER
                 clearInterval(intervalId);
                 intervalId = null;
                 startBtn.textContent = '▶ Iniciar Transmisión';
@@ -147,9 +147,8 @@
                 return;
             }
 
-            // INICIAR
             if (!navigator.geolocation) {
-                status.innerHTML = '❌ GPS no disponible';
+                status.innerHTML = '❌ GPS no disponible en este dispositivo';
                 return;
             }
 
@@ -174,16 +173,18 @@
                                 status.innerHTML = `✅ Enviado correctamente<br>${selectedVehicle}`;
                             })
                             .catch(err => {
-                                status.innerHTML = 'Error al enviar';
+                                console.error(err);
+                                status.innerHTML = '❌ Error al enviar a Firebase';
                             });
                     },
                     (error) => {
-                        status.innerHTML = 'Error GPS: ' + error.message;
+                        status.innerHTML = '❌ Error GPS: ' + error.message;
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-            }, 25000); // 25 segundos
+            }, 25000);
         });
     </script>
 </body>
+
 </html>
