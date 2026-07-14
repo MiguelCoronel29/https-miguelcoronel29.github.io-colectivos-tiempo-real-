@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Transmisor GPS - Chofer</title>
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -12,65 +13,105 @@
             font-family: Arial, sans-serif;
             background: #111;
             color: #fff;
+            margin: 0;
             padding: 20px;
             text-align: center;
+            min-height: 100vh;
         }
 
         h1 {
-            margin-bottom: 10px;
+            margin: 20px 0 30px;
+            font-size: 26px;
         }
 
-        select,
+        .container {
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 8px;
+            font-size: 17px;
+            text-align: left;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            font-size: 17px;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            border: none;
+            margin-bottom: 25px;
+        }
+
         button {
-            padding: 10px 15px;
-            font-size: 16px;
-            margin: 10px;
-            border-radius: 6px;
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        #startBtn {
+            background: #0066ff;
+        }
+
+        #startBtn.stop {
+            background: #ff4444;
         }
 
         #status {
-            font-size: 18px;
-            margin-top: 20px;
-            padding: 10px;
+            margin: 25px auto;
+            padding: 18px;
             background: #222;
-            border-radius: 8px;
-            display: inline-block;
+            border-radius: 10px;
+            font-size: 16px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .info {
+            margin-top: 40px;
             font-size: 14px;
-            color: #aaa;
-            margin-top: 20px;
+            color: #888;
+            line-height: 1.5;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🚌 Transmisor GPS - Choferr</h1>
+    <div class="container">
+        <h1>🚌 Transmisor GPS</h1>
 
-    <label for="vehiculoSelect">Seleccioná el colectivo que estás transmitiendo:</label><br>
-    <select id="vehiculoSelect">
-        <option value="interno_01">Interno 01 (Verde)</option>
-        <option value="interno_02">Interno 02 (Naranja)</option>
-        <option value="interno_03">Interno 03 (Azul)</option>
-        <option value="interno_04">Interno 04 (Magenta)</option>
-        <option value="interno_05">Interno 05 (Amarillo)</option>
-    </select>
+        <label for="vehiculoSelect"><strong>Interno del colectivo:</strong></label>
+        <select id="vehiculoSelect">
+            <option value="interno_01">Interno 01</option>
+            <option value="interno_02">Interno 02</option>
+            <option value="interno_03">Interno 03</option>
+            <option value="interno_04">Interno 04</option>
+            <option value="interno_05">Interno 05</option>
+        </select>
 
-    <br>
-    <button id="startBtn">Iniciar Transmisión GPS</button>
+        <button id="startBtn">▶ Iniciar Transmisión</button>
 
-    <p id="status">Esperando acción...</p>
+        <p id="status">Presione el botón para comenzar</p>
 
-    <div class="info">
-        Mantenga esta página abierta en el celular del chofer.<br>
-        Permita el acceso a la ubicación cuando lo pida.
+        <div class="info">
+            Mantenga esta página abierta.<br>
+            Active el GPS y permita el acceso a la ubicación.
+        </div>
     </div>
 
     <script>
-        // Configuración Firebase (la tuya)
-        // Pegá tu misma firebaseConfig aquí
         const firebaseConfig = {
             apiKey: "AIzaSyBLQTF45rPS0zUUNchDJ5DagygX8nojMxE",
             authDomain: "colectivos-tiempo-real.firebaseapp.com",
@@ -80,6 +121,7 @@
             messagingSenderId: "454978508967",
             appId: "1:454978508967:web:be55f535a0504029b5e382"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -88,64 +130,60 @@
         const startBtn = document.getElementById('startBtn');
 
         let selectedVehicle = vehiculoSelect.value;
-        let intervalId = null;  // Para detener el interval
+        let intervalId = null;
 
         vehiculoSelect.addEventListener('change', () => {
             selectedVehicle = vehiculoSelect.value;
-            status.innerHTML = `Listo para transmitir como ${selectedVehicle}. Presione "Iniciar"`;
         });
 
         startBtn.addEventListener('click', () => {
             if (intervalId !== null) {
-                // Detener
+                // DETENER
                 clearInterval(intervalId);
                 intervalId = null;
-                startBtn.textContent = 'Iniciar Transmisión GPS';
+                startBtn.textContent = '▶ Iniciar Transmisión';
+                startBtn.classList.remove('stop');
                 status.innerHTML = 'Transmisión detenida.';
                 return;
             }
 
-            if (navigator.geolocation) {
-                startBtn.textContent = 'Detener Transmisión';
-                status.innerHTML = `Transmitiendo cada 20s como ${selectedVehicle}...`;
-
-                // Enviar cada 20s (20000 ms)
-                intervalId = setInterval(() => {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
-                            const speed = position.coords.speed || 0;
-                            const heading = position.coords.heading || 0;
-
-                            const token = 'gps_linea1_' + selectedVehicle;
-
-                            db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).set({
-                                lat: lat,
-                                lng: lng,
-                                speed: speed,
-                                heading: heading,
-                                updated_at: Date.now(),
-                                online: true,
-                                token: token
-                            }).then(() => {
-                                status.innerHTML = `Enviado a ${selectedVehicle}:<br>Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}<br>Vel: ${speed.toFixed(1)} km/h`;
-                            }).catch((error) => {
-                                status.innerHTML = 'Error al enviar: ' + error.message;
-                            });
-                        },
-                        (error) => {
-                            status.innerHTML = 'Error GPS: ' + error.message;
-                        },
-                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                    );
-                }, 20000);  // ← 20 segundos, cambiá a 30000 para 30s
-            } else {
-                status.innerHTML = 'GPS no disponible';
+            // INICIAR
+            if (!navigator.geolocation) {
+                status.innerHTML = '❌ GPS no disponible';
+                return;
             }
+
+            startBtn.textContent = '⏹ Detener Transmisión';
+            startBtn.classList.add('stop');
+            status.innerHTML = `Transmitiendo como <b>${selectedVehicle}</b><br>Cada 25 segundos...`;
+
+            intervalId = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const data = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            speed: position.coords.speed || 0,
+                            heading: position.coords.heading || 0,
+                            updated_at: Date.now(),
+                            online: true
+                        };
+
+                        db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).set(data)
+                            .then(() => {
+                                status.innerHTML = `✅ Enviado correctamente<br>${selectedVehicle}`;
+                            })
+                            .catch(err => {
+                                status.innerHTML = 'Error al enviar';
+                            });
+                    },
+                    (error) => {
+                        status.innerHTML = 'Error GPS: ' + error.message;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }, 25000); // 25 segundos
         });
     </script>
 </body>
-
-</html>
 </html>

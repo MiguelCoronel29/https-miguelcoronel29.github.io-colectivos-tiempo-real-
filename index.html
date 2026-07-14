@@ -122,66 +122,89 @@
             }
         });
 
-        // Ramal A hacia Correo Central
-        const chkRamalACorreo = document.getElementById('ramal-a-correo');
-        chkRamalACorreo.addEventListener('change', () => {
-            const visible = chkRamalACorreo.checked;
-            if (map && map.getLayer('ruta-180-correo-layer')) {
-                map.setLayoutProperty('ruta-180-correo-layer', 'visibility', visible ? 'visible' : 'none');
+        // Ramal A hacia Correo Central (Corregido para Leaflet)
+        const chkRamalcorreo = document.getElementById('ramal-a-correo'); // 👈 ID correcto según tu HTML
+
+        chkRamalcorreo.addEventListener('change', () => {
+            // Si el checkbox está marcado, agregamos la ruta del correo
+            if (chkRamalcorreo.checked) {
+                polylineCorreo.addTo(map); // 👈 Variable correcta de esta ruta
+            } else {
+                // Si se desmarca, removemos la ruta del correo
+                map.removeLayer(polylineCorreo); // 👈 Variable correcta de esta ruta
             }
         });
 
         // Ramal B hacia Primera Junta
-        const chkRamalB = document.getElementById('ramal-b-primerajunta');
-        chkRamalB.addEventListener('change', () => {
-            const visible = chkRamalB.checked;
-            if (map && map.getLayer('ruta-180-aprimerajunta-layer')) {
-                map.setLayoutProperty('ruta-180-aprimerajunta-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamalprimerajunta = document.getElementById('ramal-b-primerajunta');
+
+        chkRamalprimerajunta.addEventListener('change', () => {
+
+            if (chkRamalprimerajunta.checked) {
+                polylinePrimeraJunta.addTo(map);
+            } else {
+
+                map.removeLayer(polylinePrimeraJunta);
             }
         });
 
         // Ramal B hacia gonzalez catan
-        const chkGonzalezCatan = document.getElementById('ramal-a-gonzalezcatan');
-        chkGonzalezCatan.addEventListener('change', () => {
-            const visible = chkGonzalezCatan.checked;
-            if (map && map.getLayer('ruta-180-agonzalezcatan-layer')) {
-                map.setLayoutProperty('ruta-180-agonzalezcatan-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamalgonzalezcatan = document.getElementById('ramal-a-gonzalezcatan');
+
+        chkRamalgonzalezcatan.addEventListener('change', () => {
+
+            if (chkRamalgonzalezcatan.checked) {
+                polylinegonzalezcatan.addTo(map);
+            } else {
+                map.removeLayer(polylinegonzalezcatan);
             }
         });
 
         // Ramal hacia San Alberto
-        const chkSanAlberto = document.getElementById('ramal-san-alberto');
-        chkSanAlberto.addEventListener('change', () => {
-            const visible = chkSanAlberto.checked;
-            if (map && map.getLayer('ruta-180-asanalberto-layer')) {
-                map.setLayoutProperty('ruta-180-asanalberto-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamalsanalberto = document.getElementById('ramal-san-alberto');
+
+        chkRamalsanalberto.addEventListener('change', () => {
+
+            if (chkRamalsanalberto.checked) {
+                polylinesanalberto.addTo(map);
+            } else {
+                map.removeLayer(polylinesanalberto);
             }
         });
 
         // Ramal C hacia Primera Junta
-        const chkRamalC = document.getElementById('ramal-c-primera-junta');
-        chkRamalC.addEventListener('change', () => {
-            const visible = chkRamalC.checked;
-            if (map && map.getLayer('ruta-180-linea-c-hasta-primera-junta-layer')) {
-                map.setLayoutProperty('ruta-180-linea-c-hasta-primera-junta-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamallinea_C_hasta_primera_junta = document.getElementById('ramal-c-primera-junta');
+
+        chkRamallinea_C_hasta_primera_junta.addEventListener('change', () => {
+
+            if (chkRamallinea_C_hasta_primera_junta.checked) {
+                polylinelinea_C_hasta_primera_junta.addTo(map);
+            } else {
+                map.removeLayer(polylinelinea_C_hasta_primera_junta);
             }
         });
 
         // Ramal D hacia San Justo
-        const chkRamalD = document.getElementById('ramal-d-san-justo');
-        chkRamalD.addEventListener('change', () => {
-            const visible = chkRamalD.checked;
-            if (map && map.getLayer('ruta-180-linea-d-hasta-san-justo-layer')) {
-                map.setLayoutProperty('ruta-180-linea-d-hasta-san-justo-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamallinea_D_hasta_San_justo = document.getElementById('ramal-d-san-justo');
+
+        chkRamallinea_D_hasta_San_justo.addEventListener('change', () => {
+
+            if (chkRamallinea_D_hasta_San_justo.checked) {
+                polylineLineaD_SanJusto.addTo(map);
+            } else {
+                map.removeLayer(polylineLineaD_SanJusto);
             }
         });
 
         // Ramal D hacia Primera Junta
-        const chkRamalDPrimera = document.getElementById('ramal-d-primera-junta');
-        chkRamalDPrimera.addEventListener('change', () => {
-            const visible = chkRamalDPrimera.checked;
-            if (map && map.getLayer('ruta-180-linea-d-hasta-primera-junta-layer')) {
-                map.setLayoutProperty('ruta-180-linea-d-hasta-primera-junta-layer', 'visibility', visible ? 'visible' : 'none');
+        const chkRamallinea_D_hasta_Primera_junta = document.getElementById('ramal-d-primera-junta');
+
+        chkRamallinea_D_hasta_Primera_junta.addEventListener('change', () => {
+
+            if (chkRamallinea_D_hasta_Primera_junta.checked) {
+                polylineLineaD_PrimeraJunta.addTo(map);
+            } else {
+                map.removeLayer(polylineLineaD_PrimeraJunta);
             }
         });
 
@@ -218,6 +241,25 @@
             });
         });
     </script>
+
+    <div id="route-creator-box">
+        <div class="creator-header">
+            <h4>Creador de Rutas (180)</h4>
+        </div>
+
+        <div class="creator-buttons">
+            <button id="btn-modo-puntos" class="btn-creator active">1. Dejar Puntos Fijos</button>
+            <button id="btn-modo-coordenadas" class="btn-creator">2. Marcar Coordenadas</button>
+        </div>
+
+        <div class="coords-scroll-container">
+            <pre id="coords-output">// Haz clic en el mapa para sumar coordenadas...</pre>
+        </div>
+
+        <button id="btn-copiar-todo" class="btn-action">Copiar Todo el Bloque</button>
+        <button id="btn-limpiar-todo" class="btn-action btn-danger">Limpiar Todo</button>
+    </div>
+
 </body>
 
 </html>

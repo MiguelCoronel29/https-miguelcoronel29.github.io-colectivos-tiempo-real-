@@ -201,3 +201,96 @@ body {
     cursor: pointer;
 }
 
+
+
+
+
+
+
+
+/* Contenedor Principal de la Ventana */
+#route-creator-box {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 1000;
+    padding: 15px;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ddd;
+}
+
+.creator-header h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Botonera */
+.creator-buttons {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.btn-creator {
+    flex: 1;
+    padding: 8px 5px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-creator.active {
+    background: #0066ff;
+    color: white;
+    border-color: #0055dd;
+}
+
+/* El contenedor con Scroll limitado (Muestra aprox. 3 líneas) */
+.coords-scroll-container {
+    background: #272822; /* Color consola oscura */
+    color: #f8f8f2;
+    padding: 10px;
+    border-radius: 6px;
+    height: 75px; /* Altura fija perfecta para 3 líneas */
+    overflow-y: scroll;
+    margin-bottom: 10px;
+}
+
+#coords-output {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
+/* Botones de acción */
+.btn-action {
+    width: 100%;
+    padding: 8px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-action:hover {
+    opacity: 0.9;
+}
+
