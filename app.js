@@ -1925,7 +1925,7 @@ const rutaLinea180sanalberto = [
 
 ];
 const polylinesanalberto = L.polyline(rutaLinea180sanalberto, {
-    color: '#AA00FF',
+    color: '#ff0000',
     weight: 6,
     opacity: 0.9
 }).addTo(map);
@@ -2128,7 +2128,7 @@ const rutaLinea_180_linea_C_hasta_primera_junta = [
     
 ];
 const polylinelinea_C_hasta_primera_junta = L.polyline(rutaLinea_180_linea_C_hasta_primera_junta, {
-    color: '#FF00AA',
+    color: '#ff0000',
     weight: 6,
     opacity: 0.9
 }).addTo(map);
@@ -2518,7 +2518,7 @@ const rutaLinea_180_linea_D_hasta_San_justo = [
 
 ];
 const polylineLineaD_SanJusto = L.polyline(rutaLinea_180_linea_D_hasta_San_justo, {
-    color: '#00FFAA',
+    color: '#ff0000',
     weight: 6,
     opacity: 0.9
 }).addTo(map);
@@ -2814,7 +2814,7 @@ const rutaLinea_180_linea_D_hasta_Primera_junta = [
 
 ];
 const polylineLineaD_PrimeraJunta = L.polyline(rutaLinea_180_linea_D_hasta_Primera_junta, {
-    color: '#FFAA00',
+    color: '#ff0000',
     weight: 6,
     opacity: 0.9
 }).addTo(map);
@@ -2828,7 +2828,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.p
 }).addTo(map);
 
 // ==================== CREADOR DE RUTAS AUTOMÁTICO (SEGURO) ====================
-
+/*
 document.addEventListener('DOMContentLoaded', () => {
     // Nos aseguramos de que los elementos existan antes de hacer nada
     const btnModoPuntos = document.getElementById('btn-modo-puntos');
@@ -2941,3 +2941,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+*/

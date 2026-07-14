@@ -294,3 +294,22 @@ body {
     opacity: 0.9;
 }
 
+
+/*
+<div id="route-creator-box">
+        <div class="creator-header">
+            <h4>Creador de Rutas (180)</h4>
+        </div>
+
+        <div class="creator-buttons">
+            <button id="btn-modo-puntos" class="btn-creator active">1. Dejar Puntos Fijos</button>
+            <button id="btn-modo-coordenadas" class="btn-creator">2. Marcar Coordenadas</button>
+        </div>
+
+        <div class="coords-scroll-container">
+            <pre id="coords-output">// Haz clic en el mapa para sumar coordenadas...</pre>
+        </div>
+
+        <button id="btn-copiar-todo" class="btn-action">Copiar Todo el Bloque</button>
+        <button id="btn-limpiar-todo" class="btn-action btn-danger">Limpiar Todo</button>
+    </div>*/
