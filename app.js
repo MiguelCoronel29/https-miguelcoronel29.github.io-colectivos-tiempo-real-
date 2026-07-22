@@ -12,6 +12,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// ==================== MAPEO DE RAMALES ====================
+const ramalMappings = {
+    'ramal-a-idayvuelta': 'A_ida',
+    'ramal-a-correo': 'A_vuelta',
+    'ramal-b-primerajunta': 'B_ida',
+    'ramal-a-gonzalezcatan': 'B_vuelta',
+    'ramal-san-alberto': 'C',
+    'ramal-c-primera-junta': 'C',
+    'ramal-d-san-justo': 'D',
+    'ramal-d-primera-junta': 'D'
+};
+
 // ==================== INICIALIZACIÓN DEL MAPA CON LEAFLET ====================
 const map = L.map('map', {
     zoomControl: true,
@@ -2961,9 +2973,7 @@ db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
 
     Object.keys(vehicles).forEach(id => {
         const v = vehicles[id];
-
         if (!v.lat || !v.lng || v.online === false) {
-            // Si está offline o no tiene ubicación, remover del mapa
             if (markers[id]) {
                 map.removeLayer(markers[id]);
                 delete markers[id];
@@ -2973,9 +2983,28 @@ db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
 
         const latLng = [v.lat, v.lng];
 
+        // Determinar a qué ramal pertenece este vehículo
+        let ramalPrefix = null;
+        if (id.startsWith('A_ida')) ramalPrefix = 'A_ida';
+        else if (id.startsWith('A_vuelta')) ramalPrefix = 'A_vuelta';
+        else if (id.startsWith('B_ida')) ramalPrefix = 'B_ida';
+        else if (id.startsWith('B_vuelta')) ramalPrefix = 'B_vuelta';
+        else if (id.startsWith('C')) ramalPrefix = 'C';
+        else if (id.startsWith('D')) ramalPrefix = 'D';
+
+        // Verificar si el checkbox de ese ramal está marcado
+        const checkboxId = Object.keys(ramalMappings).find(key => ramalMappings[key] === ramalPrefix);
+        const checkbox = checkboxId ? document.getElementById(checkboxId) : null;
+        const shouldShow = checkbox ? checkbox.checked : true;
+
         if (markers[id]) {
-            markers[id].setLatLng(latLng);
-        } else {
+            if (shouldShow) {
+                markers[id].setLatLng(latLng);
+                map.addLayer(markers[id]);
+            } else {
+                map.removeLayer(markers[id]);
+            }
+        } else if (shouldShow) {
             markers[id] = L.marker(latLng, {
                 icon: L.divIcon({
                     className: 'bus-marker',

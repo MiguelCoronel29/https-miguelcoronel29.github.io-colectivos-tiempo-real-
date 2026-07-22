@@ -181,18 +181,6 @@
             }
         });
 
-        // ==================== VINCULAR COLECTIVOS A RAMALES ====================
-        const ramalMappings = {
-            'ramal-a-idayvuelta': 'A_ida',
-            'ramal-a-correo': 'A_vuelta',
-            'ramal-b-primerajunta': 'B_ida',
-            'ramal-a-gonzalezcatan': 'B_vuelta',
-            'ramal-san-alberto': 'C',
-            'ramal-c-primera-junta': 'C',
-            'ramal-d-san-justo': 'D',
-            'ramal-d-primera-junta': 'D'
-        };
-
         Object.keys(ramalMappings).forEach(checkboxId => {
             const checkbox = document.getElementById(checkboxId);
             if (checkbox) {
