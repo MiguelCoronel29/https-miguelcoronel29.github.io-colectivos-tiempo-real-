@@ -2956,6 +2956,7 @@ document.addEventListener('DOMContentLoaded', () => {
 */
 // ==================== MARCADORES DE COLECTIVOS + VINCULACIÓN CON RAMALES ====================
 const markers = {};
+const STALE_TIME = 2 * 60 * 1000; // 2 minutos sin actualizar = considerado offline
 const vehicleToRamal = {
     // Formato: "A01", "A02", ... → ramal
     "A_ida01": "A_ida", "A_ida02": "A_ida", "A_ida03": "A_ida",
@@ -2970,10 +2971,23 @@ const vehicleToRamal = {
 
 db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
     const vehicles = snapshot.val() || {};
+    const now = Date.now();
 
     Object.keys(vehicles).forEach(id => {
         const v = vehicles[id];
+
+        // Si no tiene ubicación o está marcado como offline
         if (!v.lat || !v.lng || v.online === false) {
+            if (markers[id]) {
+                map.removeLayer(markers[id]);
+                delete markers[id];
+            }
+            return;
+        }
+
+        // Limpieza automática: si no se actualizó en los últimos 2 minutos
+        if (now - v.updated_at > STALE_TIME) {
+            db.ref(`lines/linea_1/vehicles/${id}`).update({ online: false });
             if (markers[id]) {
                 map.removeLayer(markers[id]);
                 delete markers[id];
