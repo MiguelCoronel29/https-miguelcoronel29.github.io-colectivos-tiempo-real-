@@ -121,7 +121,7 @@
                     (error) => console.error('GPS Error:', error),
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-            }, 25000);
+            }, 1000);
         });
 
         endBtn.addEventListener('click', () => {
