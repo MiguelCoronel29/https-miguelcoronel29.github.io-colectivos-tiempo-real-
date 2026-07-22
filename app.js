@@ -3036,3 +3036,20 @@ db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
         }
     });
 });
+
+// ==================== LIMPIEZA AUTOMÁTICA PERIÓDICA ====================
+setInterval(() => {
+    const now = Date.now();
+
+    db.ref("lines/linea_1/vehicles").once("value", (snapshot) => {
+        const vehicles = snapshot.val() || {};
+
+        Object.keys(vehicles).forEach(id => {
+            const v = vehicles[id];
+
+            if (v.online === true && now - v.updated_at > STALE_TIME) {
+                db.ref(`lines/linea_1/vehicles/${id}`).update({ online: false });
+            }
+        });
+    });
+}, 5000);   // Revisar cada 5 segundos
