@@ -16,12 +16,16 @@
     <div class="container">
         <h1>🚌 Transmisor GPS</h1>
 
-        <label for="ramalSelect"><strong>Ramal:</strong></label>
+        <label for="ramalSelect"><strong>Ramal / Recorrido:</strong></label>
         <select id="ramalSelect">
-            <option value="A">A - González Catán ↔ Correo Central</option>
-            <option value="B">B - González Catán ↔ Primera Junta</option>
-            <option value="C">C - San Alberto / Primera Junta</option>
-            <option value="D">D - San Justo / Primera Junta</option>
+            <option value="A_ida">A - (X155) - González Catán hasta Correo Central</option>
+            <option value="A_vuelta">A - (X155) - Correo Central hasta González Catán</option>
+            <option value="B_ida">B - (Primera Junta) - González Catán hasta Primera Junta</option>
+            <option value="B_vuelta">B - (Primera Junta) - Primera Junta hasta González Catán</option>
+            <option value="C_san_alberto">C - Hasta San Alberto</option>
+            <option value="C_primera_junta">C - Hasta Primera Junta</option>
+            <option value="D_san_justo">D - Hasta San Justo</option>
+            <option value="D_primera_junta">D - Hasta Primera Junta</option>
         </select>
 
         <label for="colectivoSelect"><strong>Número de Colectivo:</strong></label>
@@ -81,7 +85,6 @@
             const vehicles = snapshot.val() || {};
             const occupied = Object.keys(vehicles).filter(key => vehicles[key].online === true);
             
-            // Actualizar opciones disponibles
             Array.from(colectivoSelect.options).forEach(option => {
                 const fullId = ramalSelect.value + option.value;
                 option.disabled = occupied.includes(fullId);
@@ -113,8 +116,7 @@
                             online: true
                         };
 
-                        db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).set(data)
-                            .catch(err => console.error(err));
+                        db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).set(data);
                     },
                     (error) => console.error('GPS Error:', error),
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -127,7 +129,6 @@
             intervalId = null;
             isTransmitting = false;
 
-            // Marcar como offline
             db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).update({ online: false });
 
             startBtn.classList.remove('hidden');
@@ -135,7 +136,6 @@
             status.innerHTML = `Recorrido de ${selectedVehicle} finalizado.`;
         });
 
-        // Inicializar
         updateSelectedVehicle();
     </script>
 </body>

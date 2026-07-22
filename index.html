@@ -109,50 +109,35 @@
 
         // ==================== CONTROL DE RUTAS (LEAFLET) ====================
 
-        // 1. Vinculamos la polylinePrincipal con el checkbox del Ramal A (Ida y Vuelta)
         const chkRamalA = document.getElementById('ramal-a-idayvuelta');
-
         chkRamalA.addEventListener('change', () => {
-            // Si el checkbox está marcado, agregamos la ruta al mapa
             if (chkRamalA.checked) {
                 polylinePrincipal.addTo(map);
             } else {
-                // Si se desmarca, removemos la ruta del mapa
                 map.removeLayer(polylinePrincipal);
             }
         });
 
-        // Ramal A hacia Correo Central (Corregido para Leaflet)
-        const chkRamalcorreo = document.getElementById('ramal-a-correo'); // 👈 ID correcto según tu HTML
-
+        const chkRamalcorreo = document.getElementById('ramal-a-correo');
         chkRamalcorreo.addEventListener('change', () => {
-            // Si el checkbox está marcado, agregamos la ruta del correo
             if (chkRamalcorreo.checked) {
-                polylineCorreo.addTo(map); // 👈 Variable correcta de esta ruta
+                polylineCorreo.addTo(map);
             } else {
-                // Si se desmarca, removemos la ruta del correo
-                map.removeLayer(polylineCorreo); // 👈 Variable correcta de esta ruta
+                map.removeLayer(polylineCorreo);
             }
         });
 
-        // Ramal B hacia Primera Junta
         const chkRamalprimerajunta = document.getElementById('ramal-b-primerajunta');
-
         chkRamalprimerajunta.addEventListener('change', () => {
-
             if (chkRamalprimerajunta.checked) {
                 polylinePrimeraJunta.addTo(map);
             } else {
-
                 map.removeLayer(polylinePrimeraJunta);
             }
         });
 
-        // Ramal B hacia gonzalez catan
         const chkRamalgonzalezcatan = document.getElementById('ramal-a-gonzalezcatan');
-
         chkRamalgonzalezcatan.addEventListener('change', () => {
-
             if (chkRamalgonzalezcatan.checked) {
                 polylinegonzalezcatan.addTo(map);
             } else {
@@ -160,11 +145,8 @@
             }
         });
 
-        // Ramal hacia San Alberto
         const chkRamalsanalberto = document.getElementById('ramal-san-alberto');
-
         chkRamalsanalberto.addEventListener('change', () => {
-
             if (chkRamalsanalberto.checked) {
                 polylinesanalberto.addTo(map);
             } else {
@@ -172,11 +154,8 @@
             }
         });
 
-        // Ramal C hacia Primera Junta
         const chkRamallinea_C_hasta_primera_junta = document.getElementById('ramal-c-primera-junta');
-
         chkRamallinea_C_hasta_primera_junta.addEventListener('change', () => {
-
             if (chkRamallinea_C_hasta_primera_junta.checked) {
                 polylinelinea_C_hasta_primera_junta.addTo(map);
             } else {
@@ -184,11 +163,8 @@
             }
         });
 
-        // Ramal D hacia San Justo
         const chkRamallinea_D_hasta_San_justo = document.getElementById('ramal-d-san-justo');
-
         chkRamallinea_D_hasta_San_justo.addEventListener('change', () => {
-
             if (chkRamallinea_D_hasta_San_justo.checked) {
                 polylineLineaD_SanJusto.addTo(map);
             } else {
@@ -196,11 +172,8 @@
             }
         });
 
-        // Ramal D hacia Primera Junta
         const chkRamallinea_D_hasta_Primera_junta = document.getElementById('ramal-d-primera-junta');
-
         chkRamallinea_D_hasta_Primera_junta.addEventListener('change', () => {
-
             if (chkRamallinea_D_hasta_Primera_junta.checked) {
                 polylineLineaD_PrimeraJunta.addTo(map);
             } else {
@@ -208,9 +181,37 @@
             }
         });
 
-    </script>
+        // ==================== VINCULAR COLECTIVOS A RAMALES ====================
+        const ramalMappings = {
+            'ramal-a-idayvuelta': 'A_ida',
+            'ramal-a-correo': 'A_vuelta',
+            'ramal-b-primerajunta': 'B_ida',
+            'ramal-a-gonzalezcatan': 'B_vuelta',
+            'ramal-san-alberto': 'C',
+            'ramal-c-primera-junta': 'C',
+            'ramal-d-san-justo': 'D',
+            'ramal-d-primera-junta': 'D'
+        };
 
-    <script>
+        Object.keys(ramalMappings).forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    const ramalPrefix = ramalMappings[checkboxId];
+                    const isVisible = checkbox.checked;
+
+                    Object.keys(markers).forEach(id => {
+                        if (id.startsWith(ramalPrefix)) {
+                            if (isVisible) {
+                                map.addLayer(markers[id]);
+                            } else {
+                                map.removeLayer(markers[id]);
+                            }
+                        }
+                    });
+                });
+            }
+        });
 
         // ==================== SELECCIONAR TODAS ====================
         const selectAll = document.getElementById('select-all');
@@ -226,23 +227,17 @@
             document.getElementById('ramal-d-primera-junta')
         ];
 
-        // Evento del checkbox "Seleccionar todas"
         selectAll.addEventListener('change', () => {
             const isChecked = selectAll.checked;
 
-            // Recorremos cada checkbox individual
             allRamalCheckboxes.forEach(chk => {
                 if (chk) {
-                    // Cambiamos su estado visual
                     chk.checked = isChecked;
-                    // Activamos manualmente su evento "change" para que Leaflet agregue o remueva la línea
                     chk.dispatchEvent(new Event('change'));
                 }
             });
         });
     </script>
-
-    
 
 </body>
 

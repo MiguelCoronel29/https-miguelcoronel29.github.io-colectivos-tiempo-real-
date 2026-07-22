@@ -2942,27 +2942,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 */
-
-// ==================== ESCUCHAR Y MOSTRAR COLECTIVOS EN EL MAPA ====================
-const markers = {};  // Para guardar los marcadores
+// ==================== MARCADORES DE COLECTIVOS + VINCULACIÓN CON RAMALES ====================
+const markers = {};
+const vehicleToRamal = {
+    // Formato: "A01", "A02", ... → ramal
+    "A_ida01": "A_ida", "A_ida02": "A_ida", "A_ida03": "A_ida",
+    "A_vuelta01": "A_vuelta", "A_vuelta02": "A_vuelta",
+    "B_ida01": "B_ida", "B_ida02": "B_ida",
+    "B_vuelta01": "B_vuelta", "B_vuelta02": "B_vuelta",
+    "C_san_alberto01": "C", "C_san_alberto02": "C",
+    "C_primera_junta01": "C", "C_primera_junta02": "C",
+    "D_san_justo01": "D", "D_san_justo02": "D",
+    "D_primera_junta01": "D", "D_primera_junta02": "D"
+};
 
 db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
-    const vehicles = snapshot.val();
-
-    if (!vehicles) return;
+    const vehicles = snapshot.val() || {};
 
     Object.keys(vehicles).forEach(id => {
         const v = vehicles[id];
-
         if (!v.lat || !v.lng) return;
 
         const latLng = [v.lat, v.lng];
 
         if (markers[id]) {
-            // Actualizar posición existente
             markers[id].setLatLng(latLng);
         } else {
-            // Crear nuevo marcador
             markers[id] = L.marker(latLng, {
                 icon: L.divIcon({
                     className: 'bus-marker',
@@ -2972,7 +2977,6 @@ db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
                 })
             }).addTo(map);
 
-            // Popup con información
             markers[id].bindPopup(`
                 <b>${id}</b><br>
                 Vel: ${v.speed ? v.speed.toFixed(1) : '—'} km/h<br>
