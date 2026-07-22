@@ -2956,7 +2956,7 @@ document.addEventListener('DOMContentLoaded', () => {
 */
 // ==================== MARCADORES DE COLECTIVOS + VINCULACIÓN CON RAMALES ====================
 const markers = {};
-const STALE_TIME = 2 * 60 * 1000; // 2 minutos sin actualizar = considerado offline
+const STALE_TIME = 5 * 1000;   // 5 segundos
 const vehicleToRamal = {
     // Formato: "A01", "A02", ... → ramal
     "A_ida01": "A_ida", "A_ida02": "A_ida", "A_ida03": "A_ida",
