@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -84,7 +85,7 @@
         db.ref('lines/linea_1/vehicles').on('value', (snapshot) => {
             const vehicles = snapshot.val() || {};
             const occupied = Object.keys(vehicles).filter(key => vehicles[key].online === true);
-            
+
             Array.from(colectivoSelect.options).forEach(option => {
                 const fullId = ramalSelect.value + option.value;
                 option.disabled = occupied.includes(fullId);
@@ -129,7 +130,11 @@
             intervalId = null;
             isTransmitting = false;
 
-            db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).update({ online: false });
+            // Marcar como offline y eliminar del mapa
+            db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).update({
+                online: false,
+                updated_at: Date.now()
+            });
 
             startBtn.classList.remove('hidden');
             endBtn.classList.add('hidden');
@@ -139,4 +144,5 @@
         updateSelectedVehicle();
     </script>
 </body>
+
 </html>

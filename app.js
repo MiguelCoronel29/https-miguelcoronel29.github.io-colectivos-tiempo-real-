@@ -2961,7 +2961,15 @@ db.ref("lines/linea_1/vehicles").on("value", (snapshot) => {
 
     Object.keys(vehicles).forEach(id => {
         const v = vehicles[id];
-        if (!v.lat || !v.lng) return;
+
+        if (!v.lat || !v.lng || v.online === false) {
+            // Si está offline o no tiene ubicación, remover del mapa
+            if (markers[id]) {
+                map.removeLayer(markers[id]);
+                delete markers[id];
+            }
+            return;
+        }
 
         const latLng = [v.lat, v.lng];
 
