@@ -8,83 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: #fff;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-            min-height: 100vh;
-        }
-
-        h1 {
-            margin: 20px 0 30px;
-            font-size: 26px;
-        }
-
-        .container {
-            max-width: 380px;
-            margin: 0 auto;
-        }
-
-        label {
-            display: block;
-            margin: 15px 0 8px;
-            font-size: 17px;
-            text-align: left;
-        }
-
-        select {
-            width: 100%;
-            padding: 14px;
-            font-size: 17px;
-            border-radius: 8px;
-            background: #222;
-            color: white;
-            border: none;
-            margin-bottom: 25px;
-        }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            margin: 10px 0;
-            cursor: pointer;
-        }
-
-        #startBtn {
-            background: #0066ff;
-        }
-
-        #startBtn.stop {
-            background: #ff4444;
-        }
-
-        #status {
-            margin: 25px auto;
-            padding: 18px;
-            background: #222;
-            border-radius: 10px;
-            font-size: 16px;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .info {
-            margin-top: 40px;
-            font-size: 14px;
-            color: #888;
-            line-height: 1.5;
-        }
-    </style>
+    <link rel="stylesheet" href="css/transmisor.css">
 </head>
 
 <body>
@@ -92,21 +16,28 @@
     <div class="container">
         <h1>🚌 Transmisor GPS</h1>
 
-        <label for="vehiculoSelect"><strong>Interno del colectivo:</strong></label>
-        <select id="vehiculoSelect">
-            <option value="interno_01">A - (X155) - González Catán hasta Correo Central</option>
-            <option value="interno_02">A - (X155) - Correo Central hasta González Catán</option>
-            <option value="interno_03">B - (Primera Junta) - González Catán hasta Primera Junta</option>
-            <option value="interno_04">B - (Primera Junta) - Primera Junta hasta González Catán</option>
-            <option value="interno_05">C - Hasta San Alberto</option>
-            <option value="interno_06">C - Hasta Primera Junta</option>
-            <option value="interno_07">D - Hasta San Justo</option>
-            <option value="interno_08">D - Hasta Primera Junta</option>
+        <label for="ramalSelect"><strong>Ramal:</strong></label>
+        <select id="ramalSelect">
+            <option value="A">A - González Catán ↔ Correo Central</option>
+            <option value="B">B - González Catán ↔ Primera Junta</option>
+            <option value="C">C - San Alberto / Primera Junta</option>
+            <option value="D">D - San Justo / Primera Junta</option>
+        </select>
+
+        <label for="colectivoSelect"><strong>Número de Colectivo:</strong></label>
+        <select id="colectivoSelect">
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+            <option value="06">06</option>
         </select>
 
         <button id="startBtn">▶ Iniciar Transmisión</button>
+        <button id="endBtn" class="hidden">⏹ Finalizar Recorrido</button>
 
-        <p id="status">Presione el botón para comenzar</p>
+        <p id="status">Seleccione ramal y colectivo</p>
 
         <div class="info">
             Mantenga esta página abierta.<br>
@@ -129,34 +60,46 @@
         const db = firebase.database();
 
         const status = document.getElementById('status');
-        const vehiculoSelect = document.getElementById('vehiculoSelect');
+        const ramalSelect = document.getElementById('ramalSelect');
+        const colectivoSelect = document.getElementById('colectivoSelect');
         const startBtn = document.getElementById('startBtn');
+        const endBtn = document.getElementById('endBtn');
 
-        let selectedVehicle = vehiculoSelect.value;
+        let selectedVehicle = '';
         let intervalId = null;
+        let isTransmitting = false;
 
-        vehiculoSelect.addEventListener('change', () => {
-            selectedVehicle = vehiculoSelect.value;
+        function updateSelectedVehicle() {
+            selectedVehicle = ramalSelect.value + colectivoSelect.value;
+        }
+
+        ramalSelect.addEventListener('change', updateSelectedVehicle);
+        colectivoSelect.addEventListener('change', updateSelectedVehicle);
+
+        // Escuchar ocupación en tiempo real
+        db.ref('lines/linea_1/vehicles').on('value', (snapshot) => {
+            const vehicles = snapshot.val() || {};
+            const occupied = Object.keys(vehicles).filter(key => vehicles[key].online === true);
+            
+            // Actualizar opciones disponibles
+            Array.from(colectivoSelect.options).forEach(option => {
+                const fullId = ramalSelect.value + option.value;
+                option.disabled = occupied.includes(fullId);
+            });
         });
 
         startBtn.addEventListener('click', () => {
-            if (intervalId !== null) {
-                clearInterval(intervalId);
-                intervalId = null;
-                startBtn.textContent = '▶ Iniciar Transmisión';
-                startBtn.classList.remove('stop');
-                status.innerHTML = 'Transmisión detenida.';
-                return;
-            }
+            if (isTransmitting || !selectedVehicle) return;
 
             if (!navigator.geolocation) {
-                status.innerHTML = '❌ GPS no disponible en este dispositivo';
+                status.innerHTML = '❌ GPS no disponible';
                 return;
             }
 
-            startBtn.textContent = '⏹ Detener Transmisión';
-            startBtn.classList.add('stop');
-            status.innerHTML = `Transmitiendo como <b>${selectedVehicle}</b><br>Cada 25 segundos...`;
+            isTransmitting = true;
+            startBtn.classList.add('hidden');
+            endBtn.classList.remove('hidden');
+            status.innerHTML = `Transmitiendo <b>${selectedVehicle}</b>`;
 
             intervalId = setInterval(() => {
                 navigator.geolocation.getCurrentPosition(
@@ -171,21 +114,29 @@
                         };
 
                         db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).set(data)
-                            .then(() => {
-                                status.innerHTML = `✅ Enviado correctamente<br>${selectedVehicle}`;
-                            })
-                            .catch(err => {
-                                console.error(err);
-                                status.innerHTML = '❌ Error al enviar a Firebase';
-                            });
+                            .catch(err => console.error(err));
                     },
-                    (error) => {
-                        status.innerHTML = '❌ Error GPS: ' + error.message;
-                    },
+                    (error) => console.error('GPS Error:', error),
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             }, 25000);
         });
+
+        endBtn.addEventListener('click', () => {
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+            isTransmitting = false;
+
+            // Marcar como offline
+            db.ref(`lines/linea_1/vehicles/${selectedVehicle}`).update({ online: false });
+
+            startBtn.classList.remove('hidden');
+            endBtn.classList.add('hidden');
+            status.innerHTML = `Recorrido de ${selectedVehicle} finalizado.`;
+        });
+
+        // Inicializar
+        updateSelectedVehicle();
     </script>
 </body>
 </html>
