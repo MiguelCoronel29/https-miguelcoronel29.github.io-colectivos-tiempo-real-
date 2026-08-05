@@ -107,89 +107,38 @@
         menuBtn.addEventListener('click', () => busesPanel.classList.toggle('open'));
         closeBtn.addEventListener('click', () => busesPanel.classList.remove('open'));
 
-        // ==================== CONTROL DE RUTAS (LEAFLET) ====================
+// ==================== CONTROL DE RUTAS + COLECTIVOS ====================
 
-        const chkRamalA = document.getElementById('ramal-a-idayvuelta');
-        chkRamalA.addEventListener('change', () => {
-            if (chkRamalA.checked) {
-                polylinePrincipal.addTo(map);
-            } else {
-                map.removeLayer(polylinePrincipal);
-            }
-        });
-
-        const chkRamalcorreo = document.getElementById('ramal-a-correo');
-        chkRamalcorreo.addEventListener('change', () => {
-            if (chkRamalcorreo.checked) {
-                polylineCorreo.addTo(map);
-            } else {
-                map.removeLayer(polylineCorreo);
-            }
-        });
-
-        const chkRamalprimerajunta = document.getElementById('ramal-b-primerajunta');
-        chkRamalprimerajunta.addEventListener('change', () => {
-            if (chkRamalprimerajunta.checked) {
-                polylinePrimeraJunta.addTo(map);
-            } else {
-                map.removeLayer(polylinePrimeraJunta);
-            }
-        });
-
-        const chkRamalgonzalezcatan = document.getElementById('ramal-a-gonzalezcatan');
-        chkRamalgonzalezcatan.addEventListener('change', () => {
-            if (chkRamalgonzalezcatan.checked) {
-                polylinegonzalezcatan.addTo(map);
-            } else {
-                map.removeLayer(polylinegonzalezcatan);
-            }
-        });
-
-        const chkRamalsanalberto = document.getElementById('ramal-san-alberto');
-        chkRamalsanalberto.addEventListener('change', () => {
-            if (chkRamalsanalberto.checked) {
-                polylinesanalberto.addTo(map);
-            } else {
-                map.removeLayer(polylinesanalberto);
-            }
-        });
-
-        const chkRamallinea_C_hasta_primera_junta = document.getElementById('ramal-c-primera-junta');
-        chkRamallinea_C_hasta_primera_junta.addEventListener('change', () => {
-            if (chkRamallinea_C_hasta_primera_junta.checked) {
-                polylinelinea_C_hasta_primera_junta.addTo(map);
-            } else {
-                map.removeLayer(polylinelinea_C_hasta_primera_junta);
-            }
-        });
-
-        const chkRamallinea_D_hasta_San_justo = document.getElementById('ramal-d-san-justo');
-        chkRamallinea_D_hasta_San_justo.addEventListener('change', () => {
-            if (chkRamallinea_D_hasta_San_justo.checked) {
-                polylineLineaD_SanJusto.addTo(map);
-            } else {
-                map.removeLayer(polylineLineaD_SanJusto);
-            }
-        });
-
-        const chkRamallinea_D_hasta_Primera_junta = document.getElementById('ramal-d-primera-junta');
-        chkRamallinea_D_hasta_Primera_junta.addEventListener('change', () => {
-            if (chkRamallinea_D_hasta_Primera_junta.checked) {
-                polylineLineaD_PrimeraJunta.addTo(map);
-            } else {
-                map.removeLayer(polylineLineaD_PrimeraJunta);
-            }
-        });
+        const ramalMappings = {
+            'ramal-a-idayvuelta': 'A_ida',
+            'ramal-a-correo': 'A_vuelta',
+            'ramal-b-primerajunta': 'B_ida',
+            'ramal-a-gonzalezcatan': 'B_vuelta',
+            'ramal-san-alberto': 'C_primera_junta',
+            'ramal-c-primera-junta': 'C_san_alberto',
+            'ramal-d-san-justo': 'D_san_justo',
+            'ramal-d-primera-junta': 'D_primera_junta'
+        };
 
         Object.keys(ramalMappings).forEach(checkboxId => {
             const checkbox = document.getElementById(checkboxId);
             if (checkbox) {
                 checkbox.addEventListener('change', () => {
-                    const ramalPrefix = ramalMappings[checkboxId];
+                    const ramalKey = ramalMappings[checkboxId];
                     const isVisible = checkbox.checked;
 
+                    // Ruta
+                    if (rutas[ramalKey]) {
+                        if (isVisible) {
+                            rutas[ramalKey].addTo(map);
+                        } else {
+                            map.removeLayer(rutas[ramalKey]);
+                        }
+                    }
+
+                    // Colectivos
                     Object.keys(markers).forEach(id => {
-                        if (id.startsWith(ramalPrefix)) {
+                        if (id.startsWith(ramalKey)) {
                             if (isVisible) {
                                 map.addLayer(markers[id]);
                             } else {
@@ -201,7 +150,7 @@
             }
         });
 
-        // ==================== SELECCIONAR TODAS ====================
+        // Seleccionar todas
         const selectAll = document.getElementById('select-all');
 
         const allRamalCheckboxes = [
@@ -217,7 +166,6 @@
 
         selectAll.addEventListener('change', () => {
             const isChecked = selectAll.checked;
-
             allRamalCheckboxes.forEach(chk => {
                 if (chk) {
                     chk.checked = isChecked;
