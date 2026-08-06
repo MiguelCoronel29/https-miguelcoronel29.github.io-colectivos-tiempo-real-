@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Colectivos en Tiempo Real - Línea 180</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Tus estilos -->
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <button id="myLocationBtn" class="floating-btn">
+        <img src="location-icon.png" alt="Mi ubicación" style="width: 32px; height: 32px;">
+    </button>
+
+    <button id="menu-btn">☰</button>
+
+    <!-- Panel lateral -->
+    <div id="buses-panel">
+        <button id="close-panel-btn">✕</button>
+
+        <div style="margin-top: 55px; text-align: center;">
+            <h2 style="color:#fff; margin-bottom: 25px; font-size: 22px;">
+                🚌 Linea 180
+            </h2>
+        </div>
+
+        <div style="background:#2a2a2a; padding:18px; border-radius:10px;">
+            <strong style="color:#fff; display:block; margin-bottom:15px;">Ramales</strong>
+
+            <!-- Seleccionar Todas -->
+            <div class="ramal-item" style="margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 12px;">
+                <input type="checkbox" id="select-all" checked>
+                <label for="select-all" style="font-weight: bold; color: #fff;">
+                    Seleccionar / Deseleccionar todas
+                </label>
+            </div>
+
+            <!-- Ramales individuales -->
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a-idayvuelta" checked>
+                <label for="ramal-a-idayvuelta">A - (X155) - González Catán hasta Correo Central</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a-correo" checked>
+                <label for="ramal-a-correo">A - (X155) - Correo Central hasta González Catán</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-b-primerajunta" checked>
+                <label for="ramal-b-primerajunta">B - (Primera Junta) - González Catán hasta Primera Junta</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-a-gonzalezcatan" checked>
+                <label for="ramal-a-gonzalezcatan">B - (Primera Junta) - Primera junta hasta González Catán</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-san-alberto" checked>
+                <label for="ramal-san-alberto">C - Hasta San Alberto</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-c-primera-junta" checked>
+                <label for="ramal-c-primera-junta">C - Hasta Primera Junta</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-d-san-justo" checked>
+                <label for="ramal-d-san-justo">D - Hasta San Justo</label>
+            </div>
+
+            <div class="ramal-item">
+                <input type="checkbox" id="ramal-d-primera-junta" checked>
+                <label for="ramal-d-primera-junta">D - Hasta Primera Junta</label>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+
+    <!-- Control del panel -->
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const busesPanel = document.getElementById('buses-panel');
+        const closeBtn = document.getElementById('close-panel-btn');
+
+        menuBtn.addEventListener('click', () => busesPanel.classList.toggle('open'));
+        closeBtn.addEventListener('click', () => busesPanel.classList.remove('open'));
+
+// ==================== CONTROL DE RUTAS + COLECTIVOS ====================
+
+        const ramalMappings = {
+            'ramal-a-idayvuelta': 'A_ida',
+            'ramal-a-correo': 'A_vuelta',
+            'ramal-b-primerajunta': 'B_ida',
+            'ramal-a-gonzalezcatan': 'B_vuelta',
+            'ramal-san-alberto': 'C_primera_junta',
+            'ramal-c-primera-junta': 'C_san_alberto',
+            'ramal-d-san-justo': 'D_san_justo',
+            'ramal-d-primera-junta': 'D_primera_junta'
+        };
+
+        Object.keys(ramalMappings).forEach(checkboxId => {
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    const ramalKey = ramalMappings[checkboxId];
+                    const isVisible = checkbox.checked;
+
+                    // Ruta
+                    if (rutas[ramalKey]) {
+                        if (isVisible) {
+                            rutas[ramalKey].addTo(map);
+                        } else {
+                            map.removeLayer(rutas[ramalKey]);
+                        }
+                    }
+
+                    // Colectivos
+                    Object.keys(markers).forEach(id => {
+                        if (id.startsWith(ramalKey)) {
+                            if (isVisible) {
+                                map.addLayer(markers[id]);
+                            } else {
+                                map.removeLayer(markers[id]);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        // Seleccionar todas
+        const selectAll = document.getElementById('select-all');
+
+        const allRamalCheckboxes = [
+            document.getElementById('ramal-a-idayvuelta'),
+            document.getElementById('ramal-a-correo'),
+            document.getElementById('ramal-b-primerajunta'),
+            document.getElementById('ramal-a-gonzalezcatan'),
+            document.getElementById('ramal-san-alberto'),
+            document.getElementById('ramal-c-primera-junta'),
+            document.getElementById('ramal-d-san-justo'),
+            document.getElementById('ramal-d-primera-junta')
+        ];
+
+        selectAll.addEventListener('change', () => {
+            const isChecked = selectAll.checked;
+            allRamalCheckboxes.forEach(chk => {
+                if (chk) {
+                    chk.checked = isChecked;
+                    chk.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
