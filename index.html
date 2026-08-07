@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Colectivos en Tiempo Real - Línea 180</title>
     <link rel="stylesheet" href="css/styles.css">
-    
+
     <style>
         body {
             margin: 0;
@@ -13,6 +14,9 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
             color: #222;
+            overflow-y: auto;
+            /* Permite scroll vertical */
+            min-height: 100vh;
         }
 
         .header {
@@ -37,7 +41,7 @@
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .welcome-card h2 {
@@ -59,7 +63,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .social-icons a {
@@ -88,7 +92,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .cta-icon {
@@ -116,7 +120,7 @@
             cursor: pointer;
             text-align: center;
             margin-top: 10px;
-            box-shadow: 0 4px 12px rgba(0,168,107,0.3);
+            box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
         }
 
         .main-button:active {
@@ -131,6 +135,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
@@ -155,9 +160,19 @@
             </div>
         </div>
 
-        <!-- Espacio para banner (opcional) -->
-        <div class="banner-space">
-            Espacio para banner publicitario
+        <!-- Banner Adsterra 300x250 -->
+        <div class="banner-space"
+            style="display: flex; justify-content: center; align-items: center; min-height: 250px;">
+            <script>
+                atOptions = {
+                    'key': '1acde703ecd400737f56650285221a96',
+                    'format': 'iframe',
+                    'height': 250,
+                    'width': 300,
+                    'params': {}
+                };
+            </script>
+            <script src="https://www.highperformanceformat.com/1acde703ecd400737f56650285221a96/invoke.js"></script>
         </div>
 
         <!-- Cómo funciona -->
@@ -165,7 +180,8 @@
             <div class="cta-icon">📍</div>
             <div>
                 <strong>Cómo funciona</strong><br>
-                <span style="color:#666; font-size:14px;">Activá el mapa y mirá la ubicación de los colectivos en tiempo real.</span>
+                <span style="color:#666; font-size:14px;">Activá el mapa y mirá la ubicación de los colectivos en tiempo
+                    real.</span>
             </div>
         </div>
 
@@ -182,7 +198,7 @@
 
     <script>
         // Aquí vamos a conectar el botón con el anuncio
-        document.getElementById('startBtn').addEventListener('click', function() {
+        document.getElementById('startBtn').addEventListener('click', function () {
             // Por ahora solo redirige al mapa
             // Después conectamos el interstitial de Adsterra
             window.location.href = 'mapa.html';
@@ -190,4 +206,5 @@
     </script>
 
 </body>
+
 </html>
